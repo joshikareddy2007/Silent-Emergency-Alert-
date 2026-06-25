@@ -1,0 +1,13 @@
+{
+  "name": "emergency-alert",
+  "version": "1.0.0",
+  "description": "Emergency SMS Alert System",
+  "main": "server.js",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "twilio": "^5.12.1"
+  }
+}

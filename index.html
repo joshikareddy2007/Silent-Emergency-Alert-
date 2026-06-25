@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silent SOS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body{background:#020617}
+.glass{background:rgba(255,255,255,.1);backdrop-filter:blur(12px)}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.7)}100%{box-shadow:0 0 0 25px rgba(239,68,68,0)}}
+</style>
+</head>
+
+<body class="text-white">
+
+<!-- LOGIN -->
+<div id="loginPage" class="min-h-screen flex items-center justify-center p-6">
+
+<div class="glass p-8 rounded-2xl w-full max-w-sm space-y-4">
+
+<h2 class="text-center text-2xl font-bold">Silent SOS</h2>
+
+<input id="name" placeholder="Name" class="w-full p-3 rounded bg-white/10">
+<input id="phone" placeholder="Phone" class="w-full p-3 rounded bg-white/10">
+
+<button type="button" onclick="signup()"class="w-full bg-green-600 p-3 rounded">Sign Up</button>
+<button type="button" onclick="login()"class="w-full bg-blue-600 p-3 rounded">Login</button>
+
+</div>
+</div>
+
+<!-- CONTACT PAGE -->
+<div id="contactPage" class="hidden min-h-screen p-6 space-y-4">
+
+<h3 class="text-xl font-bold">Emergency Contacts</h3>
+
+<input id="c1" placeholder="+91..." class="w-full p-3 rounded bg-white/10">
+<input id="c2" placeholder="+91..." class="w-full p-3 rounded bg-white/10">
+<input id="c3" placeholder="+91..." class="w-full p-3 rounded bg-white/10">
+
+<button onclick="saveContacts()" class="bg-green-600 w-full p-3 rounded">
+Save & Continue
+</button>
+
+</div>
+
+<!-- HOME -->
+<div id="homePage" class="hidden min-h-screen">
+
+<div class="flex justify-between items-center p-4">
+<h2 class="text-lg font-bold">Silent SOS</h2>
+<div class="space-x-4">
+<span onclick="showAccount()" class="cursor-pointer">👤</span>
+<span onclick="showSettings()" class="cursor-pointer">⚙</span>
+</div>
+</div>
+
+<div class="p-6 text-center">
+
+<button onclick="sendAlert('GENERAL')" class="pulse w-40 h-40 bg-red-600 rounded-full text-4xl mx-auto">
+SOS
+</button>
+
+<div class="grid grid-cols-2 gap-4 mt-10">
+
+<button onclick="sendAlert('MEDICAL')" class="bg-slate-800 p-4 rounded">🏥 Medical</button>
+<button onclick="sendAlert('SAFETY')" class="bg-slate-800 p-4 rounded">🛡 Safety</button>
+<button onclick="sendAlert('ACCIDENT')" class="bg-slate-800 p-4 rounded">🚗 Accident</button>
+<button onclick="sendAlert('FIRE')" class="bg-slate-800 p-4 rounded">🔥 Fire</button>
+
+</div>
+
+<p id="status" class="mt-6"></p>
+
+</div>
+</div>
+
+<!-- ACCOUNT -->
+<div id="accountPage" class="hidden min-h-screen p-6 space-y-3">
+
+<h2 class="text-xl font-bold">Your Account</h2>
+
+<p id="accName"></p>
+<p id="accPhone"></p>
+<p id="accContacts"></p>
+
+<button onclick="goHome()" class="mt-6 bg-blue-600 p-3 rounded w-full">Back</button>
+
+</div>
+
+<!-- SETTINGS -->
+<div id="settingsPage" class="hidden min-h-screen p-6">
+
+<h2 class="text-xl font-bold">Settings</h2>
+
+<button onclick="logout()" class="mt-10 bg-red-600 p-3 rounded w-full">
+Logout
+</button>
+
+</div>
+
+<script>
+
+let user = {};
+let contacts = [];
+
+// ---------- SIGNUP ----------
+function signup(){
+
+const n=document.getElementById("name").value.trim();
+const p=document.getElementById("phone").value.trim();
+
+if(!n || !p){
+alert("Enter name and phone");
+return;
+}
+
+user = { name:n, phone:p };
+
+localStorage.setItem("user", JSON.stringify(user));
+
+alert("Signup successful. Now add emergency contacts.");
+
+openContacts();
+}
+
+// ---------- LOGIN ----------
+function login(){
+
+const p=document.getElementById("phone").value.trim();
+
+if(!p){
+alert("Enter phone number");
+return;
+}
+
+const u = localStorage.getItem("user");
+
+if(!u){
+alert("Account not found. Please signup.");
+return;
+}
+
+user = JSON.parse(u);
+
+const entered=p.replace(/\D/g,'').slice(-10);
+const saved=user.phone.replace(/\D/g,'').slice(-10);
+
+if(entered !== saved){
+alert("Wrong phone number");
+return;
+}
+
+alert("Login successful.");
+
+openContacts();
+}
+
+// ---------- CONTACT PAGE ----------
+function openContacts(){
+document.getElementById("loginPage").style.display="none";
+document.getElementById("contactPage").style.display="block";
+}
+
+// ---------- SAVE CONTACTS ----------
+function saveContacts(){
+
+contacts=[
+document.getElementById("c1").value,
+document.getElementById("c2").value,
+document.getElementById("c3").value
+].filter(x=>x);
+
+localStorage.setItem("contacts", JSON.stringify(contacts));
+
+openHome();
+}
+
+// ---------- HOME ----------
+function openHome(){
+
+user = JSON.parse(localStorage.getItem("user"));
+contacts = JSON.parse(localStorage.getItem("contacts")) || [];
+
+document.getElementById("loginPage").style.display="none";
+document.getElementById("contactPage").style.display="none";
+document.getElementById("homePage").style.display="block";
+}
+
+// ---------- ACCOUNT ----------
+function showAccount(){
+
+user = JSON.parse(localStorage.getItem("user"));
+contacts = JSON.parse(localStorage.getItem("contacts")) || [];
+
+homePage.style.display="none";
+accountPage.style.display="block";
+
+accName.innerText="Name: "+user.name;
+accPhone.innerText="Phone: "+user.phone;
+accContacts.innerText="Contacts: "+contacts.join(", ");
+}
+
+// ---------- SETTINGS ----------
+function showSettings(){
+homePage.style.display="none";
+settingsPage.style.display="block";
+}
+
+// ---------- BACK ----------
+function goHome(){
+accountPage.style.display="none";
+settingsPage.style.display="none";
+homePage.style.display="block";
+}
+
+// ---------- LOGOUT ----------
+function logout(){
+localStorage.clear();
+location.reload();
+}
+
+// ---------- SEND SOS ----------
+function sendAlert(type){
+
+status.innerText="Getting GPS...";
+
+navigator.geolocation.getCurrentPosition(p=>{
+
+fetch("http://localhost:5000/send-alert",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+name:user.name,
+phone:user.phone,
+contacts:contacts,
+latitude:p.coords.latitude,
+longitude:p.coords.longitude,
+type:type
+})
+})
+.then(r=>r.text())
+.then(d=>status.innerText=d);
+
+});
+}
+
+</script>
+
+</body>
+</html>
